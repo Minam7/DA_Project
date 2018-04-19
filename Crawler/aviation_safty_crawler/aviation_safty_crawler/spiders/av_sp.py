@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 import scrapy
 from scrapy.spiders import *
 from scrapy.linkextractors import *
 
 years = list()
+
 
 class AvSpSpider(CrawlSpider):
     name = 'av_sp'
@@ -11,10 +11,17 @@ class AvSpSpider(CrawlSpider):
     start_urls = ['https://aviation-safety.net/database/']
 
     rules = (
-        Rule(LinkExtractor(allow=('^https\\:\\/\\/aviation\\-safety\\.net\\/database\\/dblist\\.php\\?Year\\='), restrict_css=('.innertube','p','a')),
+        Rule(LinkExtractor(allow='^https\\:\\/\\/aviation\\-safety\\.net\\/database\\/dblist\\.php\\?Year\\=',
+                           restrict_css=('.innertube', 'p', 'a')),
              callback="parse_item",
              follow=False),)
 
     def parse_item(self, response):
-        years.append(response.url)
-        print(len(years))
+        records = response.css('td.list a::attr(href)').extract()
+        for x in records:
+            x = 'https://aviation-safety.net' + str(x)
+            yield scrapy.Request(x, callback=self.parse_detail_page)
+
+    def parse_detail_page(self, response):
+        s = response.css('td.desc').extract()
+        print(s)
