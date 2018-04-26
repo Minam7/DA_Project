@@ -18,3 +18,6 @@ questions:
 12. Rank flights based on safety
 13. Impact of plane crash on airline prices
 14. Impact of embrago on Iran plane crashes
+
+
+data link: https://aviation-safety.net
