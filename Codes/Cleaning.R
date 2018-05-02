@@ -82,3 +82,7 @@ asn <- asn %>% select(-find)
 remove(asn_false, asn_true)
 
 asn[asn == ""] <- NA
+
+asn <- asn %>% mutate(DepartureAirport = ifelse(DepartureAirport == "?" | DepartureAirport == "-", NA, DepartureAirport))
+
+write.csv(asn, file = "Data/asn_c.csv",row.names=FALSE)
