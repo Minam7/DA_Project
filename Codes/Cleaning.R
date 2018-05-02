@@ -3,6 +3,7 @@ library(tidyr)
 library(stringr)
 
 asn <- read.csv("Data/asn.csv")
+
 # delete junk rows
 asn <- asn %>% arrange(Engines)
 asn = asn[-c(1:2),]
@@ -70,7 +71,6 @@ asn <- bind_rows(asn_false, asn_true) %>% select(-find)
 remove(asn_false, asn_true)
 
 # change date of first flight
-
 asn <- asn %>% mutate(find = grepl(pattern = "\\d{4}", asn$Date))
 asn_true <- asn %>% filter(find == TRUE)
 asn_true$Date = str_match(asn_true$Date, pattern = "\\d{4}")
