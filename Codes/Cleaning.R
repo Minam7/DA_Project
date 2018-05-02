@@ -81,3 +81,4 @@ asn <- asn %>% select(-find)
 
 remove(asn_false, asn_true)
 
+asn[asn == ""] <- NA
