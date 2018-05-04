@@ -1,11 +1,9 @@
 library(highcharter)
 
-casn <- casn %>% filter(!is.na(Date))
-
-year_fat <- casn %>% group_by(Date) %>% 
-  summarise(Total_occupants = sum(Total_occupants), Total_fatalities = sum(Total_fatalities)) %>% 
-  mutate(Total_survivors = Total_occupants - Total_fatalities, 
-         Survival_rate = 100*Total_survivors/Total_occupants)
+# army and civil flights
+year_fat <- casn %>% filter(!is.na(Date)) %>% group_by(Date) %>% 
+  summarise(Total_occupants = sum(Total_occupants), Total_fatalities = sum(Total_fatalities),
+            Total_survivors = sum(Total_survivors), Survival_rate = 100*Total_survivors/Total_occupants)
 
 # remove bad data
 year_fat <- year_fat[-c(3),]
@@ -25,4 +23,3 @@ year_fat  %>%
   hc_xAxis(title = list(text = "Year")) %>% 
   hc_title(text = "Survival Rate Per Year", style = list(fontWeight = "bold")) %>%
   hc_add_theme(hc_theme_sandsignika())
-

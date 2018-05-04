@@ -30,6 +30,7 @@ report.pdf
 library(dplyr)
 library(stringr)
 library(highcharter)
+library(ggplot2)
 ```
 ***
 <p dir="RTL">
@@ -132,20 +133,32 @@ asn_c.csv
 
 ***
 <p dir="RTL">
+**بارگزاری داده**
+<br>
+برای سهولت کار با داده، ستون بازماندگان و نرخ زنده ماندن را به داده ها اضافه می کنیم. همچنین ایرادات این داده را که شامل خطای وارد شدن تعداد مسافران و کشته ها است را نیز برطرف می کنیم. هم چنین ستونی به عنوان نظامی بودن هواپیما و خط هوایی را نیز محاسبه می کنیم.
+</p>
+
+```{r, message=FALSE, warning=FALSE, comment=NA}
+casn <- read.csv("Data/asn_c.csv") %>% as.data.frame(stringsAsFactors = F) %>% 
+  mutate(Total_occupants = ifelse(Total_occupants == 0 & Total_fatalities != 0, Total_fatalities, Total_occupants),
+         Total_survivors = abs(Total_occupants - Total_fatalities)) %>% 
+  mutate(Total_survivors = ifelse(Total_survivors > Total_occupants, Total_occupants, abs(Total_occupants - Total_fatalities))) %>% 
+  mutate(mean_survivors = 100*Total_survivors/Total_occupants) %>% 
+  mutate(is_army = str_detect(Operator, regex("Force|Navy",ignore_case = T)))
+```
+
+***
+<p dir="RTL">
 **بررسی روند تلفات رخدادهای امنیتی پروازها در طول سالیان**
 <br>
 برای این منظور ابتدا داده ها را بر اساس سال گروه بندی می کنیم، سپس تعداد تلفات، بازماندگان، افراد درگیر در حادثه و نرخ زنده ماندن را بدست می آوریم.(برای سال ۱۹۲۱ داده ی مناسبی به وجود نداشت به همین علت این سال از داده ها حذف شده است.)
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
-casn <- read.csv("Data/asn_c.csv") %>% as.data.frame(stringsAsFactors = F)
-
-casn <- casn %>% filter(!is.na(Date))
-
-year_fat <- casn %>% group_by(Date) %>% 
-  summarise(Total_occupants = sum(Total_occupants), Total_fatalities = sum(Total_fatalities)) %>% 
-  mutate(Total_survivors = Total_occupants - Total_fatalities, 
-         Survival_rate = 100*Total_survivors/Total_occupants)
+# army and civil flights
+year_fat <- casn %>% filter(!is.na(Date)) %>% group_by(Date) %>% 
+  summarise(Total_occupants = sum(Total_occupants), Total_fatalities = sum(Total_fatalities),
+            Total_survivors = sum(Total_survivors), Survival_rate = 100*Total_survivors/Total_occupants)
 
 # remove bad data
 year_fat <- year_fat[-c(3),]
@@ -160,7 +173,7 @@ highchart() %>%
 ```
 
 <p dir="RTL">
-همانطور که مشاهده می کنیم، تلفات حوادث در حال کاهش است. البته باید دقت داشته باشیم که این کاهش هم چنین نشانگر این است که استاندارد پرواز ها بالاتر رفته است. زیرا هر چه سال جلوتر می روند، تکنولوژی نیز پیشرفت کرده و تعداد مسافران هواپیماها نیز بیشتر می شود.
+همانطور که مشاهده می کنیم، تلفات حوادث در حال کاهش است. البته باید دقت داشته باشیم که این کاهش هم چنین نشانگر این است که استاندارد پرواز ها بالاتر رفته است. زیرا هر چه سال جلوتر می روند، تکنولوژی نیز پیشرفت کرده و تعداد مسافران هواپیماها نیز بیشتر می شود. 
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
@@ -177,3 +190,69 @@ year_fat  %>%
 با توجه به نمودارهای بالا همانطور که انتظار داشتیم، نرخ زنده ماندن تقریبا به صورت خطی بیشتر شده است.
 </p>
 ***
+
+<p dir="RTL">
+**بدترین خطوط هوایی، بدترین هواپیماها و بدترین فرودگاه ها**
+<br>
+ابتدا معیار بد بودن را انتخاب می کنیم، از آنجایی که شرکت هایی که تعداد پایینی پرواز و یا پروازهای کوچکی داشته باشند، در صورت سقوط دارای نرخ پایین زنده ماندن هستند اما در واقع حادثه بزرگی به شمار نمی آیند، تنها خطوط هوایی، هواپیماها و فرودگاه هایی را انتخاب می کنیم که بالای ۵۰۰ نفر مسافر داشته اند. سپس معیار بد بودن را نرخ پایین زنده ماندن در نظر میگیریم.
+</p>
+
+```{r, message=FALSE, warning=FALSE, comment=NA}
+# worst airline
+worst_airline <- casn %>% filter(!is.na(Operator)) %>% 
+  filter(is_army == FALSE) %>% 
+  group_by(Operator) %>% 
+  summarise(Total_occupants = sum(Total_occupants), Total_fatalities = sum(Total_fatalities),
+            Total_survivors = sum(Total_survivors), Survival_rate = 100*Total_survivors/Total_occupants) %>% 
+  ungroup() %>% 
+  filter(Total_occupants > 500) %>% 
+  top_n(20, wt = desc(Survival_rate)) %>% 
+  arrange(Survival_rate)
+
+p = ggplot(data = worst_airline, mapping = aes(x = reorder(Operator, Survival_rate), y = Survival_rate, fill = Total_fatalities)) + 
+  geom_bar(stat="identity") + scale_fill_gradient(low="brown1", high="brown4") + 
+  ggtitle("Worst Airlines with lowest survival rate") + 
+  xlab("Airline") + 
+  ylab("survival ratee") + guides(color=guide_legend(title="fatality"), fill=guide_legend(title="fatality")) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+p
+
+# worst airplane
+worst_airplane <- casn %>% filter(!is.na(Type)) %>% 
+  filter(is_army == FALSE) %>% 
+  group_by(Type) %>% 
+  summarise(Total_occupants = sum(Total_occupants), Total_fatalities = sum(Total_fatalities),
+            Total_survivors = sum(Total_survivors), Survival_rate = 100*Total_survivors/Total_occupants) %>% 
+  ungroup() %>% 
+  filter(Total_occupants > 500) %>% 
+  top_n(20, wt = desc(Survival_rate)) %>% 
+  arrange(Survival_rate)
+
+p = ggplot(data = worst_airplane, mapping = aes(x = reorder(Type, Survival_rate), y = Survival_rate, fill = Total_fatalities)) + 
+  geom_bar(stat="identity") +
+  ggtitle("Worst Airplanes with lowest survival rate") + 
+  xlab("Airplane") + 
+  ylab("survival ratee") + guides(color=guide_legend(title="fatality"), fill=guide_legend(title="fatality")) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+p
+
+# worst route
+worst_departure_airport <- casn %>% filter(!is.na(DepartureAirport)) %>% 
+  filter(is_army == FALSE) %>% 
+  group_by(DepartureAirport) %>% 
+  summarise(Total_occupants = sum(Total_occupants), Total_fatalities = sum(Total_fatalities),
+            Total_survivors = sum(Total_survivors), Survival_rate = 100*Total_survivors/Total_occupants) %>% 
+  ungroup() %>% 
+  filter(Total_occupants > 500) %>% 
+  top_n(20, wt = desc(Survival_rate)) %>% 
+  arrange(Survival_rate)
+
+p = ggplot(data = worst_departure_airport, mapping = aes(x = reorder(DepartureAirport, Survival_rate), y = Survival_rate, fill = Total_fatalities)) + 
+  geom_bar(stat="identity") + scale_fill_gradient(low="midnightblue", high="darkred") +
+  ggtitle("Worst Departure Airports with lowest survival rate") + 
+  xlab("Departure Airport") + 
+  ylab("survival ratee") + guides(color=guide_legend(title="fatality"), fill=guide_legend(title="fatality")) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+p
+```
+
