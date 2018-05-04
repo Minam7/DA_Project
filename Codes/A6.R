@@ -16,7 +16,7 @@ p = ggplot(data = worst_airline, mapping = aes(x = reorder(Operator, Survival_ra
   ggtitle("Worst Airlines with lowest survival rate") + 
   xlab("Airline") + 
   ylab("survival ratee") + guides(color=guide_legend(title="fatality"), fill=guide_legend(title="fatality")) + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+  coord_flip()
 p
 
 # worst airplane
@@ -35,7 +35,7 @@ p = ggplot(data = worst_airplane, mapping = aes(x = reorder(Type, Survival_rate)
   ggtitle("Worst Airplanes with lowest survival rate") + 
   xlab("Airplane") + 
   ylab("survival ratee") + guides(color=guide_legend(title="fatality"), fill=guide_legend(title="fatality")) + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+  coord_flip()
 p
 
 # worst route
@@ -54,5 +54,5 @@ p = ggplot(data = worst_departure_airport, mapping = aes(x = reorder(DepartureAi
   ggtitle("Worst Departure Airports with lowest survival rate") + 
   xlab("Departure Airport") + 
   ylab("survival ratee") + guides(color=guide_legend(title="fatality"), fill=guide_legend(title="fatality")) + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+  coord_flip()
 p
