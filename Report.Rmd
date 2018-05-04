@@ -22,6 +22,12 @@ output:
 report.pdf 
 آمده است.
 <br>
+داده های ذخیره شده از طریق لینک زیر قابل دسترسی است:
+<br>
+https://github.com/Ajal88/DA_Project
+</p>
+***
+<p dir="RTL">
 **کتابخانه های مورد نیاز**
 <br>
 </p>
