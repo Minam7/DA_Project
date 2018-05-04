@@ -1,0 +1,179 @@
+---
+title: "Data Analysis of Aviation Safety Occurance"
+subtitle: "Data Analysis Project Phase 1: Data Gathering and Exploratory Data Analysis"
+author: "Amirabbas Jalali - Mina Moosavifar"
+output:
+  prettydoc::html_pretty:
+    theme: tactile
+    highlight: github
+---
+
+<div align="center">
+<img  src="Images/flight.png"  align = 'center'>
+</div>
+
+> <p dir="RTL"> 
+در این پروژه رخدادهای امنیت پروازها از سال ۱۹۱۹ تا کنون را بررسی می کنیم.
+</p>
+
+***
+<p dir="RTL">
+توضیحات نحوه ی جمع آوری داده ها و پاکسازی آن در فایل 
+report.pdf 
+آمده است.
+<br>
+**کتابخانه های مورد نیاز**
+<br>
+</p>
+
+```{r, message=FALSE, warning=FALSE, comment=NA}
+library(dplyr)
+library(stringr)
+library(highcharter)
+```
+***
+<p dir="RTL">
+**پاکسازی داده ها**
+<br>
+</p>
+
+```{r, message=FALSE, warning=FALSE, comment=NA, eval=FALSE}
+asn <- read.csv("Data/asn.csv")
+
+# delete junk rows
+asn <- asn %>% arrange(Engines)
+asn = asn[-c(1:2),]
+
+# fix shifted data
+bug <- asn %>% arrange(desc(Engines)) %>% slice(1:10)
+asn <- asn %>% arrange(desc(Engines))
+asn = asn[-c(1:12),]
+asn$Engines = as.numeric(asn$Engines)
+names_list <- colnames(bug)
+x = names_list[1:3]
+y = names_list[5:21]
+x = append(x,y)
+x[21] = "Operator"
+colnames(bug) = x
+bug <- bug %>% select(colnames(asn))
+bug$Engines = as.numeric(bug$Engines)
+asn <- bind_rows(asn, bug)
+remove(bug, x, y, names_list)
+
+asn <- asn %>% select(-Time, -Registration, -C.n.msn)
+
+# change strings to data for passengers
+s <- asn %>% select(Passengers)
+s <- str_split_fixed(s$Passengers, pattern = " ", 5) %>% as.data.frame(stringsAsFactors = F)
+colnames(s) = c("kill","kill_count", "slash", "busy", "busy_kill_count")
+s <- s %>% select(Passenger_fatalities = kill_count, Passenger_occupants = busy_kill_count)
+s[is.na(s)] <- 0
+s[s == ""] <- 0
+s$Passenger_fatalities = as.numeric(s$Passenger_fatalities)
+s$Passenger_occupants = as.numeric(s$Passenger_occupants)
+
+asn <- asn %>% select(-Passengers) %>% append(s) %>% as.data.frame(stringsAsFactors = F)
+remove(s)
+
+# change strings to data for crew
+s <- str_split_fixed(asn$Crew, pattern = " ", 5) %>% as.data.frame(stringsAsFactors = F)
+colnames(s) = c("kill","kill_count", "slash", "busy", "busy_kill_count")
+s <- s %>% select(Crew_fatalities = kill_count, Crew_occupants = busy_kill_count)
+s[is.na(s)] <- 0
+s[s == ""] <- 0
+s$Crew_fatalities = as.numeric(s$Crew_fatalities)
+s$Crew_occupants = as.numeric(s$Crew_occupants)
+
+asn <- asn %>% select(-Crew) %>% append(s) %>% as.data.frame(stringsAsFactors = F)
+remove(s)
+
+# change strings to data for passengers
+asn <- asn %>% as.data.frame(stringsAsFactors = F) %>% select(-Total) %>% 
+  mutate(Total_fatalities = Crew_fatalities + Passenger_fatalities,
+         Total_occupants = Crew_occupants + Passenger_occupants)
+
+# change date of first flight
+asn = asn[-c(17376),]
+
+asn$FirstFlight <- str_remove_all(asn$FirstFlight, "\\s")
+
+asn <- asn %>% mutate(find = grepl(pattern = "^\\d{4}", asn$FirstFlight))
+asn_false <- asn %>% filter(find == FALSE) %>% mutate(FirstFlight = NA)
+asn_true <- asn %>% filter(find == TRUE)
+asn <- asn %>% select(-FirstFlight)
+asn_true$FirstFlight = str_match(asn_true$FirstFlight, pattern = "^\\d{4}")
+asn <- bind_rows(asn_false, asn_true) %>% select(-find)
+
+remove(asn_false, asn_true)
+
+# change date of first flight
+asn <- asn %>% mutate(find = grepl(pattern = "\\d{4}", asn$Date))
+asn_true <- asn %>% filter(find == TRUE)
+asn_true$Date = str_match(asn_true$Date, pattern = "\\d{4}")
+asn_false <- asn %>% filter(find == FALSE) %>% mutate(Date = NA)
+asn <- asn %>% select(-Date)
+asn <- bind_rows(asn_false, asn_true)
+asn <- asn %>% select(-find)
+
+remove(asn_false, asn_true)
+
+asn[asn == ""] <- NA
+
+asn <- asn %>% mutate(DepartureAirport = ifelse(DepartureAirport == "?" | DepartureAirport == "-", NA, DepartureAirport))
+
+write.csv(asn, file = "Data/asn_c.csv",row.names=FALSE)
+```
+
+<p dir="RTL">
+در نهایت داده در فایل 
+asn_c.csv 
+قرار دارد.
+</p>
+
+***
+<p dir="RTL">
+**بررسی روند تلفات رخدادهای امنیتی پروازها در طول سالیان**
+<br>
+برای این منظور ابتدا داده ها را بر اساس سال گروه بندی می کنیم، سپس تعداد تلفات، بازماندگان، افراد درگیر در حادثه و نرخ زنده ماندن را بدست می آوریم.(برای سال ۱۹۲۱ داده ی مناسبی به وجود نداشت به همین علت این سال از داده ها حذف شده است.)
+</p>
+
+```{r, message=FALSE, warning=FALSE, comment=NA}
+casn <- read.csv("Data/asn_c.csv") %>% as.data.frame(stringsAsFactors = F)
+
+casn <- casn %>% filter(!is.na(Date))
+
+year_fat <- casn %>% group_by(Date) %>% 
+  summarise(Total_occupants = sum(Total_occupants), Total_fatalities = sum(Total_fatalities)) %>% 
+  mutate(Total_survivors = Total_occupants - Total_fatalities, 
+         Survival_rate = 100*Total_survivors/Total_occupants)
+
+# remove bad data
+year_fat <- year_fat[-c(3),]
+
+highchart() %>% 
+  hc_add_series(data = year_fat, type = "spline", hcaes(x = Date, y = Total_fatalities), name = "Total Fatalities") %>% 
+  hc_add_series(data = year_fat, type = "spline", hcaes(x = Date, y = Total_survivors), name = "Total Survivors") %>% 
+  hc_yAxis(title = list(text = "Count")) %>% 
+  hc_xAxis(title = list(text = "Year")) %>% 
+  hc_title(text = "Fatalities Per Year", style = list(fontWeight = "bold")) %>%
+  hc_add_theme(hc_theme_flat())
+```
+
+<p dir="RTL">
+همانطور که مشاهده می کنیم، تلفات حوادث در حال کاهش است. البته باید دقت داشته باشیم که این کاهش هم چنین نشانگر این است که استاندارد پرواز ها بالاتر رفته است. زیرا هر چه سال جلوتر می روند، تکنولوژی نیز پیشرفت کرده و تعداد مسافران هواپیماها نیز بیشتر می شود.
+</p>
+
+```{r, message=FALSE, warning=FALSE, comment=NA}
+year_fat  %>% 
+  hchart(type = "spline", hcaes(x = Date, y = Survival_rate), name = "Survival Rate") %>% 
+  hc_yAxis(title = list(text = "Survival Rate")) %>% 
+  hc_xAxis(title = list(text = "Year")) %>% 
+  hc_title(text = "Survival Rate Per Year", style = list(fontWeight = "bold")) %>%
+  hc_add_theme(hc_theme_sandsignika())
+
+```
+
+<p dir="RTL">
+با توجه به نمودارهای بالا همانطور که انتظار داشتیم، نرخ زنده ماندن تقریبا به صورت خطی بیشتر شده است.
+</p>
+***

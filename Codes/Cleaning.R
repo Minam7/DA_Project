@@ -1,5 +1,4 @@
 library(dplyr)
-library(tidyr)
 library(stringr)
 
 asn <- read.csv("Data/asn.csv")
@@ -53,7 +52,7 @@ remove(s)
 
 # change strings to data for passengers
 asn <- asn %>% as.data.frame(stringsAsFactors = F) %>% select(-Total) %>% 
-  mutate(Totol_fatalities = Crew_fatalities + Passenger_fatalities,
+  mutate(Total_fatalities = Crew_fatalities + Passenger_fatalities,
          Total_occupants = Crew_occupants + Passenger_occupants)
 
 # change date of first flight
