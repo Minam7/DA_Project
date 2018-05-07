@@ -15,7 +15,7 @@ p = ggplot(data = worst_airline, mapping = aes(x = reorder(Operator, Survival_ra
   geom_bar(stat="identity") + scale_fill_gradient(low="brown1", high="brown4") + 
   ggtitle("Worst Airlines with lowest survival rate") + 
   xlab("Airline") + 
-  ylab("survival ratee") + guides(color=guide_legend(title="fatality"), fill=guide_legend(title="fatality")) + 
+  ylab("Survival rate") + guides(color=guide_legend(title="fatality"), fill=guide_legend(title="fatality")) + 
   coord_flip()
 p
 
@@ -34,7 +34,7 @@ p = ggplot(data = worst_airplane, mapping = aes(x = reorder(Type, Survival_rate)
   geom_bar(stat="identity") +
   ggtitle("Worst Airplanes with lowest survival rate") + 
   xlab("Airplane") + 
-  ylab("survival ratee") + guides(color=guide_legend(title="fatality"), fill=guide_legend(title="fatality")) + 
+  ylab("Survival rate") + guides(color=guide_legend(title="fatality"), fill=guide_legend(title="fatality")) + 
   coord_flip()
 p
 
@@ -53,6 +53,6 @@ p = ggplot(data = worst_departure_airport, mapping = aes(x = reorder(DepartureAi
   geom_bar(stat="identity") + scale_fill_gradient(low="midnightblue", high="darkred") +
   ggtitle("Worst Departure Airports with lowest survival rate") + 
   xlab("Departure Airport") + 
-  ylab("survival ratee") + guides(color=guide_legend(title="fatality"), fill=guide_legend(title="fatality")) + 
+  ylab("Survival rate") + guides(color=guide_legend(title="fatality"), fill=guide_legend(title="fatality")) + 
   coord_flip()
 p

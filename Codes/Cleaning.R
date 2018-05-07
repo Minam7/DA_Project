@@ -1,7 +1,8 @@
 library(dplyr)
 library(stringr)
+library(readr)
 
-asn <- read.csv("Data/asn.csv")
+asn <- readr::read_csv("Data/asn.csv")
 
 # delete junk rows
 asn <- asn %>% arrange(Engines)
@@ -79,6 +80,20 @@ asn <- bind_rows(asn_false, asn_true)
 asn <- asn %>% select(-find)
 
 remove(asn_false, asn_true)
+
+# change data of aeroflot
+asn <- asn %>% mutate(find = str_detect(Operator, regex("aeroflot",ignore_case = T)))
+asn_true <- asn %>% filter(find == TRUE)
+asn_true$Operator = "Aeroflot"
+asn_false <- asn %>% filter(find == FALSE)
+asn <- bind_rows(asn_false, asn_true)
+asn <- asn %>% select(-find)
+
+remove(asn_false, asn_true)
+
+asn[asn == "Unknown"] <- NA
+
+asn[asn == "unknown"] <- NA
 
 asn[asn == ""] <- NA
 
