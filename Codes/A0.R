@@ -1,4 +1,8 @@
-casn <- readr::read_csv("Data/asn_c.csv") %>% as.data.frame(stringsAsFactors = F) %>% 
+library(dplyr)
+library(readr)
+library(stringr)
+
+casn <- read_csv("Downloads/R/DA_Project/Data/asn_c.csv") %>% as.data.frame(stringsAsFactors = F) %>% 
   mutate(Total_occupants = ifelse(Total_occupants == 0 & Total_fatalities != 0, Total_fatalities, Total_occupants),
          Total_survivors = abs(Total_occupants - Total_fatalities)) %>% 
   mutate(Total_survivors = ifelse(Total_survivors > Total_occupants, Total_occupants, abs(Total_occupants - Total_fatalities))) %>% 
