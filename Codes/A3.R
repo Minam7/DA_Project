@@ -1,4 +1,5 @@
 library(highcharter)
+library(ggplot2)
 
 company_year = read_csv("Downloads/R/DA_Project/Data/asn_c.csv") %>% as.data.frame(stringsAsFactors = F) %>% 
   mutate(Total_occupants = ifelse(Total_occupants == 0 & Total_fatalities != 0, Total_fatalities, Total_occupants),
@@ -16,7 +17,7 @@ company_year = read_csv("Downloads/R/DA_Project/Data/asn_c.csv") %>% as.data.fra
   na.omit() %>% 
   group_by(Operator, year) %>% 
   summarise(count = n(), tot_fatal = sum(Total_fatalities), tot_occu = sum(Total_occupants)) %>% 
-  filter(tot_occu > 20, tot_fatal > 5) %>% 
+  filter(tot_occu > 20, tot_fatal > 5) %>%
   mutate(index = 1, index = cumsum(index), index = max(index)) %>% 
   filter(index > 2) %>% 
   select(-index) %>% 
@@ -37,3 +38,4 @@ company_year %>%
   hc_title(text = "Accidents Count of an Airline in years",
            style = list(fontWeight = "bold"))
 
+ggplot(company_year, aes(x = year , y = death_rate, group = Operator, fill = death_rate)) + geom_bar(stat = "identity")
