@@ -37,5 +37,3 @@ company_year %>%
                                  dashStyle = 'shortdash'))) %>% 
   hc_title(text = "Accidents Count of an Airline in years",
            style = list(fontWeight = "bold"))
-
-ggplot(company_year, aes(x = year , y = death_rate, group = Operator, fill = death_rate)) + geom_bar(stat = "identity")
