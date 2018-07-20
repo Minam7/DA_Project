@@ -209,9 +209,7 @@ company_year = read_csv("Data/asn_c.csv") %>% as.data.frame(stringsAsFactors = F
 company_year %>% 
   hchart(type = "line",
          hcaes(x = year, y = count, group = Operator)) %>%
-  hc_xAxis(type ="datetime",
-           title = list(text = "year"),
-           dateTimeLabelFormats = list(day = '%d of %b')) %>%
+  hc_xAxis(title = list(text = "year")) %>%
   hc_yAxis(title = list(text = "Accidents Count"),
            max = 22,
            tickInterval = 1,
