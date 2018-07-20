@@ -1,6 +1,6 @@
 ---
 title: "Data Analysis of Aviation Safety Occurance"
-subtitle: "Data Analysis Project Phase 1: Data Gathering and Exploratory Data Analysis"
+subtitle: "Data Analysis Project Final Phase: Answering Questions"
 author: "Amirabbas Jalali - Mina Moosavifar"
 output:
   prettydoc::html_pretty:
