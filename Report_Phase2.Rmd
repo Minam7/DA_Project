@@ -173,11 +173,45 @@ accident_summary %>% arrange(topic) %>%
 </p>
 
 <p dir="RTL">
-
+برای این سوال از دادههای حاوی میزان مسافت پرواز و ظرفیت هواپیما بهرهبردیم و شاخص 
+ASK
+را برابر میزان صندلی دردسترس کلیومتر قرار دادیمایم وشاخص یک میلیون برابر را اعمال کردهایم.
+همانطور که از شکل و نتیجهی تست برای میزان مرگ و میر بدستآمده نمیتوان از میزان کشتههای یک شرکت هواپیمایی در سوانح هوایی آن پیش بینیای برای سالهای آیندهی آن انجامداد و نمیتوان دلیلی برای سفرنکردن با آن شرکت درنظر گرفت اما حوادث به صورت کلی رابطه دارد با میزان حوادثی که در گذشتهی آن شرکت رخ داده، واین رابطه رابطهایست مستقیم که از نتیجهای تست و نمودار نیز مشخص است و میتوان نتیجهگرفت که شرکتی که حوادث بیشتری را تجربهکردهاست در آینده نیز حوادث بیشتری را تجربهخواهد کرد و سفر با آن شرکت هواپیمایی ریسک بالاتری خواهدداشت.
+میتوان این اتفاق را به سیاستگذاری و مدیریت هواپیمایی مربوط دانست.
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
+airline_safety = read_csv("Data/airline_safety.csv") %>% 
+  mutate(death_ask_85_99 = (fatalities_85_99/avail_seat_km_per_week)*10^6,
+         death_ask_00_14 = (fatalities_00_14/avail_seat_km_per_week)*10^6)
 
+ggplot(airline_safety, aes(x = death_ask_85_99, y = death_ask_00_14)) +
+  geom_point() + 
+  geom_text(aes(label=ifelse(death_ask_00_14>0.4 | death_ask_85_99>0.4,as.character(airline),'')),
+            hjust=-0.1,
+            vjust=-0.1,
+            angle=10,
+            size=3) +
+  scale_x_continuous(name="Death in 1985 - 1999 ASK", limits=c(0, 1.2)) +
+  scale_y_continuous(name="Death in 2000 - 2014 ASK", limits=c(0, 1)) + 
+  geom_smooth(method = lm, se = FALSE) + 
+  ggtitle("Fatalities of Companies")
+  
+cor.test(airline_safety$fatalities_85_99, airline_safety$fatalities_00_14)
+
+ggplot(airline_safety, aes(x = incidents_85_99, y = incidents_00_14)) +
+  geom_point() + 
+  geom_text(aes(label=ifelse(incidents_00_14>10 | incidents_85_99>20,as.character(airline),'')),
+            hjust=0,
+            vjust=0,
+            angle=10,
+            size=3) +
+  scale_x_continuous(name="Incidents in 1985 - 1999 ASK") +
+  scale_y_continuous(name="Incidents in 2000 - 2014 ASK") + 
+  geom_smooth(method = lm, se = FALSE) + 
+  ggtitle("Incidents of Companies")
+
+cor.test(airline_safety$incidents_85_99, airline_safety$incidents_00_14)
 ```
 
 ***
@@ -218,7 +252,7 @@ cor.test(age_death$age, age_death$death_rate)
 </p>
 
 <p dir="RTL">
-در این سوال قصد داریم به بررسی قدمت هواپیمایی، میانگین سنهواپیماهای دچار سانحهشده، میزان زمان پرواز، میانگین تعداد خدمه و تعداد حادثههای هر شرکت هواپیمایی و ارتباط آن با میزان نرخ کشندهبود کلی و میانگین نرخ مرگ در سوانح آنّها بپردازیم.
+در این سوال قصد داریم به بررسی قدمت هواپیمایی، میانگین سن هواپیماهای دچار سانحهشده، میزان زمان پرواز، میانگین تعداد خدمه و تعداد حادثههای هر شرکت هواپیمایی و ارتباط آن با میزان نرخ کشندهبودن کلی و میانگین نرخ مرگ در سوانح آنها بپردازیم.
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
