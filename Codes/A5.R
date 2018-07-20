@@ -50,3 +50,4 @@ cor.test(company_attr$mean_age_plane, company_attr$death_rate_avg)
 cor.test(company_attr$total_airframe, company_attr$death_rate_avg)
 cor.test(company_attr$mean_crew, company_attr$death_rate_avg)
 cor.test(company_attr$event_count, company_attr$death_rate_avg)
+
