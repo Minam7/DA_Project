@@ -38,15 +38,15 @@ company_attr = read_csv("Downloads/R/DA_Project/Data/asn_c.csv") %>% as.data.fra
 # total death rate
 cor.test(company_attr$company_age, company_attr$death_rate_company)
 cor.test(company_attr$mean_age_plane, company_attr$death_rate_company)
+
 cor.test(company_attr$total_airframe, company_attr$death_rate_company)
-cor.test(company_attr$mean_age_plane, company_attr$death_rate_company)
 cor.test(company_attr$mean_crew, company_attr$death_rate_company)
 cor.test(company_attr$event_count, company_attr$death_rate_company)
 
 # mean death rate per airplane
 cor.test(company_attr$company_age, company_attr$death_rate_avg)
 cor.test(company_attr$mean_age_plane, company_attr$death_rate_avg)
+
 cor.test(company_attr$total_airframe, company_attr$death_rate_avg)
-cor.test(company_attr$mean_age_plane, company_attr$death_rate_avg)
 cor.test(company_attr$mean_crew, company_attr$death_rate_avg)
 cor.test(company_attr$event_count, company_attr$death_rate_avg)

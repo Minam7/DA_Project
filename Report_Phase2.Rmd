@@ -182,29 +182,126 @@ accident_summary %>% arrange(topic) %>%
 
 ***
 <p dir="RTL">
-۴. آیا واقعا سن هواپیما در سقوط آن موثر است؟
+۴. آیا واقعا سن هواپیما در میزان تلفات آن موثر است؟
 </p>
 
 <p dir="RTL">
-
+برای بررسی این موضوع بایستی سن یک هواپیما و نرخ تلفات آن را محسابه کنیم و از آزمون فرض
+ cor.test
+بهرهمیبریم تا رابطهی این دو متغیر را بیابیم.
+<br>
+همانطور که در نتیجهی این آزمون مشهود است کمتربودن سن یک هواپیما هیچ تاثیری در کمتربودن نرخ کشتهشدگان آن حادثهی هواپیمایی ندارد و این نسبت اندکی به سمت رابطهی عکس است اما دلیل محکمی بر وارونه بودن این فرض نیست، به طور کلی میتوان از نتیجه این برداشت را داشت که هواپیماهایی که از کیفیت مناسبی برخوردار نیستند، زودتر نابود شده و سنین بالا را نمیبینند و از این رو هواپیماهایی که سن زیادی دارند در اولین حادثهی منجر به تلفات کم نیز کاملا از خطوط هوایی خارج میشوند.
+این تفسیر و تحلیل این نتیجه را تایید میکند که منطقی نیز هست و دادههای کاملا آن را تصدیق میکنند.
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
+age_death = read_csv("Data/asn_c.csv") %>% as.data.frame(stringsAsFactors = F) %>% 
+  mutate(Total_occupants = ifelse(Total_occupants == 0 & Total_fatalities != 0, Total_fatalities, Total_occupants),
+         Total_survivors = abs(Total_occupants - Total_fatalities)) %>% 
+  mutate(Total_survivors = ifelse(Total_survivors > Total_occupants, Total_occupants, abs(Total_occupants - Total_fatalities))) %>% 
+  mutate(is_army = str_detect(Operator, regex("Force|Navy",ignore_case = T))) %>% 
+  mutate(occ_no = row_number()) %>% 
+  select(C.n.msn, Date, FirstFlight, Total_occupants, Total_fatalities, TotalAirframeHrs) %>% 
+  na.omit() %>% 
+  mutate(age = (Date - FirstFlight),  death_rate = (Total_fatalities/Total_occupants)) %>% 
+  group_by(C.n.msn) %>% 
+  summarise(date = max(Date), first_flight = min(FirstFlight), age = max(age), total_airframe = max(TotalAirframeHrs), total_occupants = max(Total_occupants), total_fatalities = max(Total_fatalities)) %>% 
+  mutate(death_rate = (total_fatalities/total_occupants)*100) %>% 
+  filter(!is.nan(death_rate))
 
+cor.test(age_death$age, age_death$death_rate)
 ```
 
 ***
 <p dir="RTL">
-۵. چه ویژگی هایی از ایرلاین در رخدادهای امنیتی آن تاثیر دارد؟(نظیر قدمت، کشور و ...)
+۵. چه ویژگی هایی از ایرلاین در رخدادهای امنیتی آن تاثیر دارد؟(نظیر قدمت و ...)
 </p>
 
 <p dir="RTL">
+در این سوال قصد داریم به بررسی قدمت هواپیمایی، میانگین سنهواپیماهای دچار سانحهشده، میزان زمان پرواز، میانگین تعداد خدمه و تعداد حادثههای هر شرکت هواپیمایی و ارتباط آن با میزان نرخ کشندهبود کلی و میانگین نرخ مرگ در سوانح آنّها بپردازیم.
+</p>
 
+```{r, message=FALSE, warning=FALSE, comment=NA}
+company_attr = read_csv("Data/asn_c.csv") %>% as.data.frame(stringsAsFactors = F) %>% 
+  mutate(Total_occupants = ifelse(Total_occupants == 0 & Total_fatalities != 0, Total_fatalities, Total_occupants),
+         Total_survivors = abs(Total_occupants - Total_fatalities)) %>% 
+  mutate(Total_survivors = ifelse(Total_survivors > Total_occupants, Total_occupants, abs(Total_occupants - Total_fatalities))) %>% 
+  mutate(is_army = str_detect(Operator, regex("Force|Navy",ignore_case = T))) %>% 
+  mutate(occ_no = row_number()) %>% 
+  filter(is_army == FALSE) %>% 
+  select(C.n.msn,
+         Date,
+         Operator,
+         FirstFlight,
+         Total_occupants,
+         Total_fatalities,
+         TotalAirframeHrs,
+         Crew_occupants) %>% 
+  na.omit() %>% 
+  mutate(airplane_age = (Date - FirstFlight),
+         death_rate = (Total_fatalities/Total_occupants)*100) %>% 
+  filter(!is.nan(death_rate)) %>% 
+  group_by(Operator) %>% 
+  summarise(last_event = max(Date),
+            first_event = min(FirstFlight),
+            mean_age_plane = mean(airplane_age),
+            total_airframe = sum(TotalAirframeHrs),
+            mean_airframe = mean(TotalAirframeHrs),
+            total_occupants = sum(Total_occupants),
+            mean_occupants = mean(Total_occupants),
+            total_fatalities = sum(Total_fatalities),
+            mean_fatalities = mean(Total_fatalities),
+            total_crew = sum(Crew_occupants),
+            mean_crew = mean(Crew_occupants),
+            death_rate_avg = mean(death_rate),
+            event_count = n()) %>% 
+  mutate(death_rate_company = (total_fatalities/total_occupants)*100,
+         company_age = last_event - first_event) %>% 
+  filter(!is.nan(death_rate_company))
+```
+
+```{r, message=FALSE, warning=FALSE, comment=NA}
+
+# total death rate
+cor.test(company_attr$company_age, company_attr$death_rate_company)
+cor.test(company_attr$mean_age_plane, company_attr$death_rate_company)
+```
+
+<p dir="RTL">
+همانطور که مشاهدهمیشود قدمت شرکت و میانگین سن هواپیماهای آن با نرخ مرگومیر کلی شرکت رابطهی عکس دارد که برای قدمت شرکت میتوان افزایش تجربهی آنها را عامل دانست و برای سن هواپیما نیز استدلالی همچون سوال قبل به کار برد.
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
 
+cor.test(company_attr$total_airframe, company_attr$death_rate_company)
+cor.test(company_attr$mean_crew, company_attr$death_rate_company)
+cor.test(company_attr$event_count, company_attr$death_rate_company)
 ```
+
+<p dir="RTL">
+همانطور که مشاهده میشود میزان پرواز و میانگین تعداد خدمه و تعداد حوادث یک شرکت هواپیمایی ارتباطی با نرخ مرگومیر کلی آن ندارد.
+</p>
+
+```{r, message=FALSE, warning=FALSE, comment=NA}
+
+# mean death rate per airplane
+cor.test(company_attr$company_age, company_attr$death_rate_avg)
+cor.test(company_attr$mean_age_plane, company_attr$death_rate_avg)
+```
+
+<p dir="RTL">
+همانطور که مشاهدهمیشود قدمت شرکت و میانگین سن هواپیماهای آن با نرخ مرگومیر میانگین هر سانحهی آن شرکت رابطهی عکس دارد که برای قدمت شرکت میتوان افزایش تجربهی آنها را عامل دانست و برای سن هواپیما نیز استدلالی همچون سوال قبل به کار برد.
+</p>
+
+```{r, message=FALSE, warning=FALSE, comment=NA}
+
+cor.test(company_attr$total_airframe, company_attr$death_rate_avg)
+cor.test(company_attr$mean_crew, company_attr$death_rate_avg)
+cor.test(company_attr$event_count, company_attr$death_rate_avg)
+```
+<p dir="RTL">
+همانطور که مشاهده میشود میزان پرواز و میانگین تعداد خدمه و تعداد حوادث یک شرکت هواپیمایی ارتباطی با نرخ مرگومیر میانگین هر سانحهی آن شرکت ندارد.
+</p>
 
 ***
 <p dir="RTL">
