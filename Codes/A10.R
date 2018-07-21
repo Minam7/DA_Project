@@ -19,6 +19,12 @@ sum_airfare <- sum_airfare %>% inner_join(american_airlines, by = c("car")) %>% 
 american_crashes <- casn_topics %>% ungroup() %>% 
   inner_join(american_airlines, by = c("Operator"))
 
+airline_safety_total = read_csv("../Data/airline_safety.csv") %>% 
+  mutate(total_fatal_accidents = (fatal_accidents_85_99 + fatal_accidents_00_14),
+         total_incidents = (incidents_85_99 + incidents_00_14)) %>% 
+  select(airline, avail_seat_km_per_week, total_fatal_accidents, total_incidents) %>% 
+  mutate(score = 20 - (9*total_fatal_accidents + total_incidents)*10^8/avail_seat_km_per_week)
+
 sum_american_crashes <- american_crashes %>% group_by(Operator, Date) %>% 
   summarise(Total_occupants = sum(Total_occupants), 
             Total_fatalities = sum(Total_fatalities),
