@@ -260,6 +260,8 @@ cor.test(age_death$age, age_death$death_rate)
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
+library(corrplot)
+
 company_attr = read_csv("Data/asn_c.csv") %>% as.data.frame(stringsAsFactors = F) %>% 
   mutate(Total_occupants = ifelse(Total_occupants == 0 & Total_fatalities != 0, Total_fatalities, Total_occupants),
          Total_survivors = abs(Total_occupants - Total_fatalities)) %>% 
@@ -337,6 +339,16 @@ cor.test(company_attr$event_count, company_attr$death_rate_avg)
 همانطور که مشاهده میشود میزان پرواز و میانگین تعداد خدمه و تعداد حوادث یک شرکت هواپیمایی ارتباطی با نرخ مرگومیر میانگین هر سانحهی آن شرکت ندارد.
 </p>
 
+```{r, message=FALSE, warning=FALSE, comment=NA}
+num_com_attr = company_attr %>% 
+  select(-Operator)
+cor_num_com_attr = cor(num_com_attr)
+corrplot(cor_num_com_attr, method = "square", type = "lower", tl.col = "black", tl.srt = 10)
+```
+
+<p dir="RTL">
+نمودار همبستگی متغیرهای موجود را در بالا مشاهده میکنید.
+</p>
 ***
 <p dir="RTL">
 ۶. بدترین خطوط هوایی، بدترین پروازها، بدترین هواپیماها
