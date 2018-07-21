@@ -299,7 +299,6 @@ company_attr = read_csv("Data/asn_c.csv") %>% as.data.frame(stringsAsFactors = F
 ```
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
-
 # total death rate
 cor.test(company_attr$company_age, company_attr$death_rate_company)
 cor.test(company_attr$mean_age_plane, company_attr$death_rate_company)
@@ -310,7 +309,6 @@ cor.test(company_attr$mean_age_plane, company_attr$death_rate_company)
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
-
 cor.test(company_attr$total_airframe, company_attr$death_rate_company)
 cor.test(company_attr$mean_crew, company_attr$death_rate_company)
 cor.test(company_attr$event_count, company_attr$death_rate_company)
@@ -321,7 +319,6 @@ cor.test(company_attr$event_count, company_attr$death_rate_company)
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
-
 # mean death rate per airplane
 cor.test(company_attr$company_age, company_attr$death_rate_avg)
 cor.test(company_attr$mean_age_plane, company_attr$death_rate_avg)
@@ -332,7 +329,6 @@ cor.test(company_attr$mean_age_plane, company_attr$death_rate_avg)
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
-
 cor.test(company_attr$total_airframe, company_attr$death_rate_avg)
 cor.test(company_attr$mean_crew, company_attr$death_rate_avg)
 cor.test(company_attr$event_count, company_attr$death_rate_avg)
@@ -451,7 +447,6 @@ year_fat  %>%
   hc_xAxis(title = list(text = "Year")) %>% 
   hc_title(text = "Survival Rate Per Year", style = list(fontWeight = "bold")) %>%
   hc_add_theme(hc_theme_sandsignika())
-
 ```
 
 <p dir="RTL">
@@ -684,6 +679,10 @@ airline_safety_total = merge(airline_safety_total, airlines_name, sort = FALSE) 
 
 safety_price <- airline_safety_total %>% inner_join(sum_airfare, by = c("need"))
 
+knitr::kable(safety_price %>% select(airline, price, safety = score))
+```
+
+```{r, message=FALSE, warning=FALSE, comment=NA}
 cor.test(formula = ~price + score, data = safety_price)
 
 safety_price_avg = mean(safety_price$price)
@@ -691,6 +690,10 @@ safety_price_high <- safety_price %>% filter(price > safety_price_avg)
 safety_price_low <- safety_price %>% filter(price <= safety_price_avg)
 wilcox.test(safety_price_high$score, safety_price_low$score, alternative = "less", exact = FALSE, correct = FALSE)
 ```
+
+<p dir="RTL">
+همانطور که می بینیم، در تست کوریلیشن فرض استقلا
+</p>
 
 ***
 <p dir="RTL">
