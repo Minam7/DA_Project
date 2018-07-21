@@ -652,6 +652,7 @@ company_year %>%
 حاصل ضرب نرخ نجات در هواپیما و شرکت هواپیمایی در تعداد مسافر هواپیمای مذکور
 <br>
 بعد از اعمال این معیار نتیجه کسب بالاترین امتیاز توسط هواپیماهای برتر در خطوط هوایی عالی در جهان شد که مناسب بودن معیار را نشان میدهد.
+نمونهای از این امتیازدهی را در زیر مشاهده میکنید.
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
@@ -697,12 +698,27 @@ knitr::kable(top_20_flight)
 </p>
 
 <p dir="RTL">
-
+همانطور که مشاهده میکنید برای ۳ ایرلاین حادثه خیز در آمریکا اطلاعات را جمع آوری کرده و میزان قیمت و حوادث آن ها را کشیده ایم که به وضوح مشخص است هیچ ربط خاصی بین این دو مقدار وجود ندارد که منطقی نیز به نظر می رسد و هرشرکت هواپیمایی با توجه به هزینه های خود قیمت گذاری را انجام می دهد و در صورت بروز سانحه نیز دلیلی بر کاهش هزینه های آن شرکت دیده نمی شود بلکه خسارات و پیشگیری ها هزینه های بیشتری را متحمل این شرکت ها می کند که تست ارتباط نیز هیچ ارتباطی را بین این دو متغیر تایید نمی کند.
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
+library(reshape2)
 
+crash_efect = crash_price %>% 
+  select(year = Year, airline = Operator, price, occurance) %>% 
+  filter(airline == "American Airlines" |
+           airline == "United Airlines" |
+           airline == "Delta Air Lines")
+
+ggplot(crash_efect, aes(x = year, y = occurance , group = airline, fill = airline)) +
+  geom_bar(stat="identity",position="dodge")
+
+ggplot(crash_efect, aes(x = year, y = price , group = airline, fill = airline)) +
+  geom_bar(stat="identity",position="dodge")
+
+cor.test(crash_efect$price, crash_efect$occurance)
 ```
+
 
 ***
 <p dir="RTL">
