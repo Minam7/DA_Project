@@ -34,11 +34,15 @@ t.test(iran_before$count, iran_after$count, alternative = "less")
 
 # 2
 
+
 # 6
+
 
 # 7
 
+
 # 8
+
 
 
 
