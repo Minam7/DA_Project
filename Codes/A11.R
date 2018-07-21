@@ -10,7 +10,6 @@ casn_airplanes <- casn_topics %>% filter(!is.na(Type)) %>%
 
 casn_airplanes <- casn_airplanes %>% select(Type, rank, safety)
 
-
 # find safety for airlines
 casn_airlines <- casn_topics %>% filter(!is.na(Operator)) %>% 
   group_by(Operator) %>% 
