@@ -1,23 +1,15 @@
-# find safety for airplanes
-casn_airplanes <- casn_topics %>% filter(!is.na(Type)) %>% 
+# find safety for flights
+casn_flight_safety = casn_topics %>% filter(!is.na(Type) & !is.na(Operator) & Total_occupants != 0) %>% 
   group_by(Type) %>% 
-  summarise(Total_occupants = sum(Total_occupants), Total_fatalities = sum(Total_fatalities),
-            Total_survivors = sum(Total_survivors), Survival_rate = 100*Total_survivors/Total_occupants,
-            occurance = n(), mean_occupants = mean(Total_occupants)) %>% 
+  mutate(airplane_total_occupants = sum(Total_occupants), airplane_total_fatalities = sum(Total_fatalities),
+         airplane_total_survivors = sum(Total_survivors), airplane_survival_rate = airplane_total_survivors/airplane_total_occupants,
+         airplane_occurance = n(), airplane_mean_occupants = mean(Total_occupants)) %>% 
   ungroup() %>% 
-  arrange(desc(Total_survivors)) %>% 
-  mutate(rank = row_number(), safety = ifelse(Total_occupants < 1, 0.1, Survival_rate - mean_occupants/(occurance*Total_occupants)))
-
-casn_airplanes <- casn_airplanes %>% select(Type, rank, safety)
-
-# find safety for airlines
-casn_airlines <- casn_topics %>% filter(!is.na(Operator)) %>% 
   group_by(Operator) %>% 
-  summarise(Total_occupants = sum(Total_occupants), Total_fatalities = sum(Total_fatalities),
-            Total_survivors = sum(Total_survivors), Survival_rate = 100*Total_survivors/Total_occupants,
-            occurance = n(), mean_occupants = mean(Total_occupants)) %>% 
+  mutate(airline_total_occupants = sum(Total_occupants), airline_total_fatalities = sum(Total_fatalities),
+         airline_total_survivors = sum(Total_survivors), airline_survival_rate = airline_total_survivors/airline_total_occupants,
+         airline_occurance = n(), airline_mean_occupants = mean(Total_occupants)) %>% 
   ungroup() %>% 
-  arrange(desc(Total_survivors)) %>% 
-  mutate(rank = row_number(), safety = ifelse(Total_occupants < 1, 0.1, Survival_rate - mean_occupants/(occurance*Total_occupants)))
-
-casn_airlines <- casn_airlines %>% select(Operator, rank, safety)
+  mutate(score = (airplane_survival_rate*airplane_mean_occupants) + (airline_survival_rate*airline_mean_occupants) + (airplane_survival_rate*airline_survival_rate*Total_occupants)) %>% 
+  group_by(Operator, Type) %>% 
+  summarise(flight_safety_indicator = mean(score))
