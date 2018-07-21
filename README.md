@@ -21,3 +21,5 @@ questions:
 
 
 data link: https://aviation-safety.net
+
+Answer to qustions above on github IO: https://ajal88.github.io/DA_Project/Report_Phase2.html
