@@ -1,4 +1,4 @@
-airfare <- read_csv("Data/Consumer_Airfare_Report__Table_5_-_Detailed_Fare_Information_For_Highest_and_Lowest_Fare_Markets_Under_750_Miles.csv")
+airfare <- read_csv("../Data/Consumer_Airfare_Report__Table_5_-_Detailed_Fare_Information_For_Highest_and_Lowest_Fare_Markets_Under_750_Miles.csv")
 
 american_airlines <- airfare %>% select(car) %>% distinct(car) %>% arrange(car)
 pattern_name = c("Tropic", "Air Plus Comet", "American Airlines", "Alaska Airlines", "JetBlue", "Continental Air Lines",
@@ -29,7 +29,7 @@ airlines_name = as.data.frame(c("Virgin Atlantic",
                   "US Airways / America West*"))
 colnames(airlines_name) =  c("airline")
 
-airline_safety_total = read_csv("Data/airline_safety.csv") %>% 
+airline_safety_total = read_csv("../Data/airline_safety.csv") %>% 
   mutate(total_fatal_accidents = (fatal_accidents_85_99 + fatal_accidents_00_14),
          total_incidents = (incidents_85_99 + incidents_00_14)) %>% 
   select(airline, avail_seat_km_per_week, total_fatal_accidents, total_incidents) %>% 
