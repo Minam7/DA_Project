@@ -299,7 +299,6 @@ company_attr = read_csv("Data/asn_c.csv") %>% as.data.frame(stringsAsFactors = F
 ```
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
-
 # total death rate
 cor.test(company_attr$company_age, company_attr$death_rate_company)
 cor.test(company_attr$mean_age_plane, company_attr$death_rate_company)
@@ -310,7 +309,6 @@ cor.test(company_attr$mean_age_plane, company_attr$death_rate_company)
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
-
 cor.test(company_attr$total_airframe, company_attr$death_rate_company)
 cor.test(company_attr$mean_crew, company_attr$death_rate_company)
 cor.test(company_attr$event_count, company_attr$death_rate_company)
@@ -321,7 +319,6 @@ cor.test(company_attr$event_count, company_attr$death_rate_company)
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
-
 # mean death rate per airplane
 cor.test(company_attr$company_age, company_attr$death_rate_avg)
 cor.test(company_attr$mean_age_plane, company_attr$death_rate_avg)
@@ -332,7 +329,6 @@ cor.test(company_attr$mean_age_plane, company_attr$death_rate_avg)
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
-
 cor.test(company_attr$total_airframe, company_attr$death_rate_avg)
 cor.test(company_attr$mean_crew, company_attr$death_rate_avg)
 cor.test(company_attr$event_count, company_attr$death_rate_avg)
@@ -451,7 +447,6 @@ year_fat  %>%
   hc_xAxis(title = list(text = "Year")) %>% 
   hc_title(text = "Survival Rate Per Year", style = list(fontWeight = "bold")) %>%
   hc_add_theme(hc_theme_sandsignika())
-
 ```
 
 <p dir="RTL">
@@ -634,8 +629,71 @@ company_year %>%
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
+airfare <- read_csv("Data/Consumer_Airfare_Report__Table_5_-_Detailed_Fare_Information_For_Highest_and_Lowest_Fare_Markets_Under_750_Miles.csv")
 
+american_airlines <- airfare %>% select(car) %>% distinct(car) %>% arrange(car)
+pattern_name = c("Tropic", "Air Plus Comet", "American Airlines", "Alaska Airlines", "JetBlue", "Continental Air Lines",
+                 "Discovery Airways", "Delta Air Lines", "Frontier Airlines (FL)", "Tran Airways", "Allegiant Air",
+                 "America West Airlines", "", "", "Kiwi Regional Airlines", "", "Spirit Airlines", "Northwest",
+                 "", "", "Horizon Air", "", "", "", "Skydive Twin Cities", "", "United Airlines", "US Airways",
+                 "American Virginia", "Pacific Western Airlines", "", "Southwest Airlines", "", "", "Mesa Airlines",
+                 "Midwest", "Air Wisconsin")
+
+american_airlines <- data.frame(american_airlines, pattern_name)
+colnames(american_airlines ) <- c("car","Operator")
+
+airfare <- na.omit(airfare)
+airfare <- airfare %>% mutate(price = as.numeric(str_extract(mkt_fare,"\\d+")))
+sum_airfare <- airfare %>% group_by(car, Year) %>% summarise(price = mean(price))
+sum_airfare <- sum_airfare %>% inner_join(american_airlines, by = c("car")) %>% ungroup() %>% 
+  group_by(Operator) %>% summarise(price = mean(price)) %>% 
+  arrange(desc(Operator))
+
+need = as.data.frame(c(2, 3, 0, 0, 0, 4, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 3, 1, 6, 6, 0, 7, 0, 0, 0))
+colnames(need) = c('need')
+
+sum_airfare <- sum_airfare %>% bind_cols(need) %>% group_by(need) %>% summarise(price = mean(price)) %>% 
+  ungroup() %>% filter(need != 0)
+
+airlines_name = as.data.frame(c("Virgin Atlantic",
+                  "Southwest Airlines",
+                  "United / Continental*",
+                  "Alaska Airlines*",
+                  "American*",
+                  "Delta / Northwest*",
+                  "US Airways / America West*"))
+colnames(airlines_name) =  c("airline")
+
+need = as.data.frame(c(1,2,3,4,5,6,7))
+colnames(need) = c('need')
+
+airline_safety_total = read_csv("Data/airline_safety.csv") %>% 
+  mutate(total_fatal_accidents = (fatal_accidents_85_99 + fatal_accidents_00_14),
+         total_incidents = (incidents_85_99 + incidents_00_14)) %>% 
+  select(airline, avail_seat_km_per_week, total_fatal_accidents, total_incidents) %>% 
+  mutate(score = 20 - (9*total_fatal_accidents + total_incidents)*10^8/avail_seat_km_per_week)
+
+airline_safety_total = merge(airline_safety_total, airlines_name, sort = FALSE) %>% 
+  arrange(desc(airline)) %>% 
+  bind_cols(need)
+
+safety_price <- airline_safety_total %>% inner_join(sum_airfare, by = c("need"))
+
+knitr::kable(safety_price %>% select(airline, price, safety = score))
 ```
+
+```{r, message=FALSE, warning=FALSE, comment=NA}
+cor.test(formula = ~price + score, data = safety_price)
+
+safety_price_avg = mean(safety_price$price)
+safety_price_high <- safety_price %>% filter(price > safety_price_avg)
+safety_price_low <- safety_price %>% filter(price <= safety_price_avg)
+wilcox.test(safety_price_high$score, safety_price_low$score, alternative = "less", exact = FALSE, correct = FALSE)
+```
+
+<p dir="RTL">
+همانطور که می بینیم، در تست کوریلیشن فرض استقلا
+</p>
 
 ***
 <p dir="RTL">
@@ -696,6 +754,9 @@ knitr::kable(top_20_flight)
 <p dir="RTL">
 ۱۳. تاثیر وقوع سانحه ی هوایی بر روی قیمت بلیت های آن ایرلاین
 </p>
+<p dir="RTL">
+برای این سوال ابتدا داده ی قیمت پروازهای آمریکا را با داده ی حوادث ادغام کرده ایم. برای این منظور میانگین قیمت بلیت را به طور سالانه و برای هر ایرلاین بدست آورده و آن را برای رخدادهای امنیتی پروازهای آن ایرلاین در آن سال قرار می دهیم.
+</p>
 
 <p dir="RTL">
 همانطور که مشاهده میکنید برای ۳ ایرلاین حادثه خیز در آمریکا اطلاعات را جمع آوری کرده و میزان قیمت و حوادث آن ها را کشیده ایم که به وضوح مشخص است هیچ ربط خاصی بین این دو مقدار وجود ندارد که منطقی نیز به نظر می رسد و هرشرکت هواپیمایی با توجه به هزینه های خود قیمت گذاری را انجام می دهد و در صورت بروز سانحه نیز دلیلی بر کاهش هزینه های آن شرکت دیده نمی شود بلکه خسارات و پیشگیری ها هزینه های بیشتری را متحمل این شرکت ها می کند که تست ارتباط نیز هیچ ارتباطی را بین این دو متغیر تایید نمی کند.
@@ -703,6 +764,26 @@ knitr::kable(top_20_flight)
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
 library(reshape2)
+sum_airfare <- airfare %>% group_by(car, Year) %>% summarise(price = mean(price))
+sum_airfare <- sum_airfare %>% inner_join(american_airlines, by = c("car")) %>% ungroup()
+
+american_crashes <- casn_topics %>% ungroup() %>% 
+  inner_join(american_airlines, by = c("Operator"))
+
+sum_american_crashes <- american_crashes %>% group_by(Operator, Date) %>% 
+  summarise(Total_occupants = sum(Total_occupants), 
+            Total_fatalities = sum(Total_fatalities),
+            Total_survivors = sum(Total_survivors),
+            occurance = n()) %>% 
+  mutate(Survival_rate = ifelse(Total_occupants < 1, 0, 100*Total_survivors/Total_occupants), 
+         Fatality_rate = ifelse(Total_occupants < 1, 0, 100*Total_fatalities/Total_occupants)) %>% 
+  ungroup()
+
+Total_occupants_avg <- mean(sum_american_crashes$Total_occupants)
+sum_american_crashes <- sum_american_crashes %>% 
+  mutate(safety = ifelse(Total_occupants < 1, 0.1, Survival_rate - Total_occupants_avg/(occurance*Total_occupants)))
+
+crash_price <- sum_airfare %>% inner_join(sum_american_crashes, by = c("Operator", "Year" = "Date"))
 
 crash_efect = crash_price %>% 
   select(year = Year, airline = Operator, price, occurance) %>% 
@@ -711,10 +792,10 @@ crash_efect = crash_price %>%
            airline == "Delta Air Lines")
 
 ggplot(crash_efect, aes(x = year, y = occurance , group = airline, fill = airline)) +
-  geom_bar(stat="identity",position="dodge")
+  geom_bar(stat="identity",position="dodge") + ggtitle("Airline Safety Occurance Yearly")
 
 ggplot(crash_efect, aes(x = year, y = price , group = airline, fill = airline)) +
-  geom_bar(stat="identity",position="dodge")
+  geom_bar(stat="identity",position="dodge") + ggtitle("Airline Average Price Yearly")
 
 cor.test(crash_efect$price, crash_efect$occurance)
 ```
