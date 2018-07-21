@@ -1,4 +1,4 @@
-airfare <- read_csv("Data/Consumer_Airfare_Report__Table_5_-_Detailed_Fare_Information_For_Highest_and_Lowest_Fare_Markets_Under_750_Miles.csv")
+airfare <- read_csv("../Data/Consumer_Airfare_Report__Table_5_-_Detailed_Fare_Information_For_Highest_and_Lowest_Fare_Markets_Under_750_Miles.csv")
 
 american_airlines <- airfare %>% select(car) %>% distinct(car) %>% arrange(car)
 pattern_name = c("Tropic", "Air Plus Comet", "American Airlines", "Alaska Airlines", "JetBlue", "Continental Air Lines",
