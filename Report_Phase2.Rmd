@@ -643,11 +643,35 @@ company_year %>%
 </p>
 
 <p dir="RTL">
-
+برای این سوال به دنبال یک معیار جهت ارزیابی همه جانبهی یک پرواز با توجه به سابقهی هواپیمایی و سابقهی هواپیما و همچنین یک پرواز خاص که خود شرایط خاصی همچون مسیر و مسافت دارد بودیم و فرمول زیر را به عنوان معیاری از امنیت برای یک پرواز بدستآوردهایم.
+<br>
+معیار امنیت = نرخ نجات در شرکت هواپیمایی در میانگین تعداد مسافران در هر پرواز
++
+نرخ نجات در هواپیمای موردنظر در میانگین تعداد مسافران آن هواپیما
++
+حاصل ضرب نرخ نجات در هواپیما و شرکت هواپیمایی در تعداد مسافر هواپیمای مذکور
+<br>
+بعد از اعمال این معیار نتیجه کسب بالاترین امتیاز توسط هواپیماهای برتر در خطوط هوایی عالی در جهان شد که مناسب بودن معیار را نشان میدهد.
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
+# find safety for flights
+casn_flight_safety = casn_topics %>% filter(!is.na(Type) & !is.na(Operator) & Total_occupants != 0) %>% 
+  group_by(Type) %>% 
+  mutate(airplane_total_occupants = sum(Total_occupants), airplane_total_fatalities = sum(Total_fatalities),
+         airplane_total_survivors = sum(Total_survivors), airplane_survival_rate = airplane_total_survivors/airplane_total_occupants,
+         airplane_occurance = n(), airplane_mean_occupants = mean(Total_occupants)) %>% 
+  ungroup() %>% 
+  group_by(Operator) %>% 
+  mutate(airline_total_occupants = sum(Total_occupants), airline_total_fatalities = sum(Total_fatalities),
+         airline_total_survivors = sum(Total_survivors), airline_survival_rate = airline_total_survivors/airline_total_occupants,
+         airline_occurance = n(), airline_mean_occupants = mean(Total_occupants)) %>% 
+  ungroup() %>% 
+  mutate(score = (airplane_survival_rate*airplane_mean_occupants) + (airline_survival_rate*airline_mean_occupants) + (airplane_survival_rate*airline_survival_rate*Total_occupants)) %>% 
+  group_by(Operator, Type) %>% 
+  summarise(flight_safety_indicator = mean(score))
 
+knitr::kable(head(casn_flight_safety))
 ```
 
 ***
@@ -656,11 +680,15 @@ company_year %>%
 </p>
 
 <p dir="RTL">
-
+از دادههای سوال قبل بهرهبرده و در جدولی برترین پروازهای خطوط هواپیمایی را نشان میدهیم.
 </p>
 
 ```{r, message=FALSE, warning=FALSE, comment=NA}
-
+top_20_flight = casn_flight_safety %>% 
+  ungroup() %>% 
+  arrange(-flight_safety_indicator) %>% 
+  slice(1:20)
+knitr::kable(top_20_flight)
 ```
 
 ***
