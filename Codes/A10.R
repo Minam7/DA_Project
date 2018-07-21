@@ -2,7 +2,7 @@ airfare <- read_csv("Data/Consumer_Airfare_Report__Table_5_-_Detailed_Fare_Infor
 
 american_airlines <- airfare %>% select(car) %>% distinct(car) %>% arrange(car)
 pattern_name = c("Tropic", "Air Plus Comet", "American Airlines", "Alaska Airlines", "JetBlue", "Continental Air Lines",
-                 "Discovery Airways", "Delta Air Lines", "Frontier Airlines (FL)", "irTran Airways", "Allegiant Air",
+                 "Discovery Airways", "Delta Air Lines", "Frontier Airlines (FL)", "Tran Airways", "Allegiant Air",
                  "America West Airlines", "", "", "Kiwi Regional Airlines", "", "Spirit Airlines", "Northwest",
                  "", "", "Horizon Air", "", "", "", "Skydive Twin Cities", "", "United Airlines", "US Airways",
                  "American Virginia", "Pacific Western Airlines", "", "Southwest Airlines", "", "", "Mesa Airlines",
