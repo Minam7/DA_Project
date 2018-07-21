@@ -117,6 +117,7 @@ top_terms <- accident_topics %>%
   ungroup() %>%
   arrange(topic, -beta)
 ```
+
 ```{r, message=FALSE, warning=FALSE, comment=NA, eval = FALSE}
 top_terms %>%
   mutate(term = reorder(term, beta)) %>%
