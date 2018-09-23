@@ -55,6 +55,10 @@ casn <- readr::read_csv("Data/asn_c.csv") %>% as.data.frame(stringsAsFactors = F
 ```
 
 ***
+<p>
+1. Text analysis and classification of plane crash
+</p>
+
 <p dir="RTL">
 ۱. آنالیز متن و دسته بندی علت وقوع مشکلات پرواز ها
 </p>
@@ -140,6 +144,10 @@ knitr::kable(top_terms_merge)
 ```
 
 ***
+<p>
+2. Rank plane crashes classes
+</p>
+
 <p dir="RTL">
 ۲. رتبه بندی علت وقوع مشکلات برای پرواز ها
 </p>
@@ -176,6 +184,10 @@ accident_summary %>% arrange(topic) %>%
 ```
 
 ***
+<p>
+3. Shoud we avoid that airline, in case of crash occurence?
+</p>
+
 <p dir="RTL">
 ۳. آیا در صورت سقوط پرواز یک ایرلاین، دیگر نباید با آن پرواز کنیم؟
 </p>
@@ -223,6 +235,10 @@ cor.test(airline_safety$incidents_85_99, airline_safety$incidents_00_14)
 ```
 
 ***
+<p>
+4. Is plane age effective in safety occurene?
+</p>
+
 <p dir="RTL">
 ۴. آیا واقعا سن هواپیما در میزان تلفات آن موثر است؟
 </p>
@@ -255,6 +271,10 @@ cor.test(age_death$age, age_death$death_rate)
 ```
 
 ***
+<p>
+5. Which characteristics of airlines is influential in safety occurence?
+</p>
+
 <p dir="RTL">
 ۵. چه ویژگی هایی از ایرلاین در رخدادهای امنیتی آن تاثیر دارد؟(نظیر قدمت و ...)
 </p>
@@ -354,6 +374,10 @@ corrplot(cor_num_com_attr, method = "square", type = "lower", tl.col = "black", 
 نمودار همبستگی متغیرهای موجود را در بالا مشاهده میکنید.
 </p>
 ***
+<p>
+6. Worst Airline, Worst Airplane, Worst Flight way
+</p>
+
 <p dir="RTL">
 ۶. بدترین خطوط هوایی، بدترین پروازها، بدترین هواپیماها
 </p>
@@ -424,6 +448,10 @@ p
 ```
 
 ***
+<p>
+7. Visualize data of safety occurance year by year
+</p>
+
 <p dir="RTL">
 ۷. سالانه چندین تصادف هوایی رخ می دهد؟ چند نفر سوار پرواز بوده اند؟ چند نفر جان سالم به در برده و چند نفر فوت کرده است؟
 </p>
@@ -470,6 +498,10 @@ year_fat  %>%
 </p>
 
 ***
+<p>
+8. Visualize planes engaged in crash classification with their fatality
+</p>
+
 <p dir="RTL">
 ۸. در هر کدام از دسته های علت وقوع مشکلات پروازها، چه هواپیماهایی دچار مشکل شدند و چند کشته برجای گذاشته اند؟
 </p>
@@ -584,6 +616,10 @@ knitr::kable(casn_topic_air %>% filter(topic == 20))
 ```
 
 ***
+<p>
+9. Does a crash improve airline perfomance?
+</p>
+
 <p dir="RTL">
 ۹. آیا وقوع رخدادهایی برای یک ایرلاین باعث بهبود روند آن می شود؟
 </p>
@@ -636,6 +672,10 @@ company_year %>%
 ```
 
 ***
+<p>
+10. Does a cheap flight shows lack of safety?
+</p>
+
 <p dir="RTL">
 ۱۰. انتخاب ارزان ترین پروازها، به معنی ناامن بودن آنها است؟
 </p>
@@ -714,6 +754,10 @@ wilcox rank sum test
 </p>
 
 ***
+<p>
+11. Add safety scale to flights
+</p>
+
 <p dir="RTL">
 ۱۱. اضافه کردن معیار امنیت به پروازها
 </p>
@@ -752,6 +796,10 @@ knitr::kable(head(casn_flight_safety))
 ```
 
 ***
+<p>
+12. Rank flights based on safety
+</p>
+
 <p dir="RTL">
 ۱۲. رده بندی پروازها بر اساس امنیت
 </p>
@@ -769,6 +817,10 @@ knitr::kable(top_20_flight)
 ```
 
 ***
+<p>
+13. Impact of plane crash on airline prices
+</p>
+
 <p dir="RTL">
 ۱۳. تاثیر وقوع سانحه ی هوایی بر روی قیمت بلیت های آن ایرلاین
 </p>
@@ -820,6 +872,10 @@ cor.test(crash_efect$price, crash_efect$occurance)
 
 
 ***
+<p>
+14. Impact of embrago on Iran plane crashes
+</p>
+
 <p dir="RTL">
 ۱۴. تاثیر تحریم ها بر روی سوانح هوایی ایران و تحلیل سوالات فوق برای ایران
 </p>
